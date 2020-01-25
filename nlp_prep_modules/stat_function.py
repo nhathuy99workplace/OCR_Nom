@@ -20,21 +20,19 @@ def statCalculator(listOfRect):
         y.append(rect[1])
         width.append(rect[2])
         height.append(rect[3])
-        area.append(rect[4])
+        area.append(rect[2]*rect[3])
 
     #Cross out any elements in the paremeter lists that is out of interquartile range  
     for element in width:
         if element > np.quantile(width, .75) or element < np.quantile(width, .25) :
-            print(element)
             width.remove(element)
     print('\n')       
     for element in height:
         if element > np.quantile(height, .75)  or element < np.quantile(height, .25) :
-            print(element)
             height.remove(element)
 
     #Return mean width and height of the bounding boxes
-    return [meanCal(width), meanCal(height)]
+    return meanCal(width), meanCal(height)
     
 
 if __name__ == "__main__":

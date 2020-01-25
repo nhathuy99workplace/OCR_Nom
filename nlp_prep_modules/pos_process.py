@@ -1,3 +1,6 @@
+from __future__ import division
+from __future__ import print_function
+
 def extractCoordinatePartition(listOfRects, choice):
     result = []
     for rect in listOfRects:
@@ -18,7 +21,7 @@ def coordinateNeeded(standard, coordinates, choice):
                     result.append(sortedCoordinates[curr])
                 else :
                     result.append(sortedCoordinates[curr+1])
-            curr = counter
+            curr += counter
             counter = 0
 
     if counter > 0:
@@ -33,6 +36,6 @@ def coordinateNeeded(standard, coordinates, choice):
     return result
 
 
-if __name__ == "__main__":
-    #unit test
+# if __name__ == "__main__":
+#     #unit test
     

@@ -15,7 +15,7 @@ def image_processing(filename):
 
     img = cv.fastNlMeansDenoising(img, None, 10, 7, 21 )
 
-    opening = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
+    # opening = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
     
     opening = cv.dilate(img,kernel,iterations = 1)
 
@@ -50,15 +50,15 @@ def printExternalContour(img, contours, hierarchy):
             currLv+=1
 
     for i in range(len(listOfHierarchy)):
-        # if listOfLevel[i]%2 != 0:
-        listOfContours.append(contours[i])
+        if listOfLevel[i] < 3:
+            listOfContours.append(contours[i])
         
     contours_poly = [None]*len(listOfContours)
 
     for i, c in enumerate(listOfContours):
         contours_poly[i] = cv.approxPolyDP(c, 3, True)
         tmp = cv.boundingRect(contours_poly[i])
-        if tmp[2]*tmp[3] < 6000 and tmp[2]*tmp[3] > 850:
+        if tmp[2]*tmp[3] < 6000 and tmp[2]*tmp[3] > 800:
             listOfRect.append(cv.boundingRect(contours_poly[i]))
     # print(listOfLevel)
     return listOfRect
