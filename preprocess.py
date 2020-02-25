@@ -4,10 +4,18 @@ import nlp_prep_modules.pos_process as pos_f
 
 import cv2 as cv
 
-filename = './nlp_prep_modules/page002.jpg'
+filename = './nlp_prep_modules/lvt001.jpg'
 
 raw = cv.imread(filename)
-img = cv_f.image_processing(filename)
+
+# scale_percent = 100# percent of original size
+# width = int(raw.shape[1] * scale_percent / 100)
+# height = int(raw.shape[0] * scale_percent / 100)
+# dim = (width, height)
+#     # resize image
+# raw = cv.resize(raw, dim, interpolation = cv.INTER_AREA)
+
+img = cv_f.image_processing(raw)
 
 cv.imshow("Frame", img)
 cv.waitKey(0)  
