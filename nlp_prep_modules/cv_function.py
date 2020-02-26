@@ -8,6 +8,8 @@ import scipy.signal as sc
 import statistics as stats
 import concurrent.futures as fu
 import collections
+import re
+import os 
 
 def image_processing(img):
 
@@ -32,7 +34,6 @@ def findContour(image):
         cv.rectangle(image, (rect[0], rect[1]), (rect[0] + rect[2], rect[1] + rect[3]), (121, 11, 189), 2)
 
     return listOfRect, image
-
 
 def printExternalContour(img, contours, hierarchy):
     listOfHierarchy = hierarchy[0]
@@ -165,8 +166,8 @@ def choose_subimage(cropped, cropped_coordinate):
         # cv.imshow("Frame", cropped[i])
         # cv.waitKey(0)
 
-        img_column_sum, _, max_col_index = projection_hist(image_processing(cropped[i]), 0, 1)
-        img_row_sum, _, max_row_index = projection_hist(image_processing(cropped[i]), 1, 1)
+        img_column_sum, _, max_col_index = projection_hist(image_processing(cropped[i]), 0, 2)
+        img_row_sum, _, max_row_index = projection_hist(image_processing(cropped[i]), 1, 2)
         img_column_sum_arr = np.asarray(img_column_sum)
         img_row_sum_arr = np.asarray(img_row_sum)
 
@@ -175,7 +176,7 @@ def choose_subimage(cropped, cropped_coordinate):
 
         # plt.plot(img_column_sum)
         # plt.scatter(max_col_index, img_column_sum_arr[max_col_index],linewidth=0.3, s=30, c='r')
-        # plt.scatter(min_col_index, img_column_sum_arr[min_col_index],linewidth=0.3, s=30, c='b')
+        # # plt.scatter(min_col_index, img_column_sum_arr[min_col_index],linewidth=0.3, s=30, c='b')
         # plt.axhline(y=ch_v, color='r', linestyle='-')
         # plt.axhline(y=cl_v, color='g', linestyle='-')
         # plt.axhline(y=ca_v, color='b', linestyle='-')
@@ -184,7 +185,7 @@ def choose_subimage(cropped, cropped_coordinate):
 
         # plt.plot(img_row_sum)
         # plt.scatter(max_row_index, img_row_sum_arr[max_row_index],linewidth=0.3, s=30, c='r')
-        # plt.scatter(min_row_index, img_row_sum_arr[min_row_index],linewidth=0.3, s=30, c='b')
+        # # plt.scatter(min_row_index, img_row_sum_arr[min_row_index],linewidth=0.3, s=30, c='b')
         # plt.axhline(y=ch_h, color='r', linestyle='-')
         # plt.axhline(y=cl_h, color='g', linestyle='-')
         # plt.axhline(y=ca_h, color='b', linestyle='-')
@@ -220,8 +221,8 @@ def choose_subimage(cropped, cropped_coordinate):
 def projection_cut(satisfiedImgs, satisfiedImgsCor):
     characters = []
     characterCoordinates = []
-    cv.imshow("Frame", satisfiedImgs)
-    cv.waitKey(0)
+    # cv.imshow("Frame", satisfiedImgs)
+    # cv.waitKey(0)
 
     img_column_sum, min_col_index, max_col_index = projection_hist(image_processing(satisfiedImgs), 0, 10)
     img_row_sum, min_row_index, max_row_index = projection_hist(image_processing(satisfiedImgs), 1, 10)
@@ -231,21 +232,21 @@ def projection_cut(satisfiedImgs, satisfiedImgsCor):
     ch_v, ca_v, cl_v = c_calculator(img_column_sum_arr, min_col_index, max_col_index)
     ch_h, ca_h, cl_h = c_calculator(img_row_sum_arr, min_row_index, max_row_index)
 
-    plt.plot(img_column_sum)
-    plt.scatter(max_col_index, img_column_sum_arr[max_col_index],linewidth=0.3, s=30, c='r')
-    plt.scatter(min_col_index, img_column_sum_arr[min_col_index],linewidth=0.3, s=30, c='b')
-    plt.axhline(y=ch_v, color='r', linestyle='-')
-    plt.axhline(y=cl_v, color='g', linestyle='-')
-    plt.axhline(y=ca_v, color='b', linestyle='-')
-    plt.show()
+    # plt.plot(img_column_sum)
+    # plt.scatter(max_col_index, img_column_sum_arr[max_col_index],linewidth=0.3, s=30, c='r')
+    # plt.scatter(min_col_index, img_column_sum_arr[min_col_index],linewidth=0.3, s=30, c='b')
+    # plt.axhline(y=ch_v, color='r', linestyle='-')
+    # plt.axhline(y=cl_v, color='g', linestyle='-')
+    # plt.axhline(y=ca_v, color='b', linestyle='-')
+    # plt.show()
 
-    plt.plot(img_row_sum)
-    plt.scatter(max_row_index, img_row_sum_arr[max_row_index],linewidth=0.3, s=30, c='r')
-    plt.scatter(min_row_index, img_row_sum_arr[min_row_index],linewidth=0.3, s=30, c='b')
-    plt.axhline(y=ch_h, color='r', linestyle='-')
-    plt.axhline(y=cl_h, color='g', linestyle='-')
-    plt.axhline(y=ca_h, color='b', linestyle='-')
-    plt.show()
+    # plt.plot(img_row_sum)
+    # plt.scatter(max_row_index, img_row_sum_arr[max_row_index],linewidth=0.3, s=30, c='r')
+    # plt.scatter(min_row_index, img_row_sum_arr[min_row_index],linewidth=0.3, s=30, c='b')
+    # plt.axhline(y=ch_h, color='r', linestyle='-')
+    # plt.axhline(y=cl_h, color='g', linestyle='-')
+    # plt.axhline(y=ca_h, color='b', linestyle='-')
+    # plt.show()
 
     promo_v = collections.defaultdict(lambda: 0)
     promo_h = collections.defaultdict(lambda: 0)
@@ -295,10 +296,10 @@ def projection_cut(satisfiedImgs, satisfiedImgsCor):
     #             characters.append(tmpImg[i][promo[0]:promo[1], 0:int(tmpImg[i].shape[1])])
     #     print(i)
 
-    print(characterCoordinates)
-    for img in characters:
-        cv.imshow("Frame", img)
-        cv.waitKey(0)
+    # print(characterCoordinates)
+    # for img in characters:
+    #     cv.imshow("Frame", img)
+    #     cv.waitKey(0)
 
     return characters, characterCoordinates
 
@@ -341,7 +342,7 @@ if __name__ == "__main__":
     cv.imshow("Frame", img)
     cv.waitKey(0)
 
-    scale_percent = 150 #225# percent of original size
+    scale_percent = 150 # 225 # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -351,6 +352,13 @@ if __name__ == "__main__":
     cv.imshow("Frame", img)
     cv.waitKey(0)
     img = image_processing(raw)
+
+    regex = re.match(r'(.*)!?\/([^\/]*)\.\w*', filename,  re.M|re.I)
+
+    sub_filename = regex.group(2)
+
+    if not os.path.exists(sub_filename):
+        os.mkdir(sub_filename)
 
 
     # cv.imshow("Frame", img)
@@ -388,11 +396,26 @@ if __name__ == "__main__":
     
     satisfiedImgs, satisfiedImgsCor = choose_subimage(cropped, cropped_coordinate)
 
-    for image in satisfiedImgs:
-        cv.imshow("Frame", image)
-        cv.waitKey(0)
-    print(satisfiedImgsCor)
+    subsub_filename = []
+    for i in range(len(satisfiedImgs)):
+        subsub_filename.append(sub_filename + '/' + str(i))
+        if not os.path.exists(subsub_filename[i]):
+            os.mkdir(subsub_filename[i])
+        # cv.imshow("Frame", satisfiedImgs[i])
+        # cv.waitKey(0)
+        cv.imwrite(sub_filename + '/' + str(i)+'.jpg', satisfiedImgs[i])
+
+    # for image in satisfiedImgs:
+    #     cv.imshow("Frame", image)
+    #     cv.waitKey(0)
+    # print(satisfiedImgsCor)
 
     for i in range(len(satisfiedImgs)):
-        projection_cut(satisfiedImgs[i], satisfiedImgsCor[i])
+        characters, characterCoordinates = projection_cut(satisfiedImgs[i], satisfiedImgsCor[i])
+        
+        for j in range(len(characters)):
+            # cv.imshow("Frame", characters[j])
+            # cv.waitKey(0)
+            cv.imwrite(subsub_filename[i] + '/' + str(j) + '.jpg', characters[j])
+
 
