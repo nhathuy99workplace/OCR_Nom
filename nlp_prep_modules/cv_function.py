@@ -128,13 +128,13 @@ def line_detection(img, choice):
     ch, ca, cl = c_calculator(img_sum_arr, min_index, max_index)
     
     # Draw the graphs using matplotlib
-    plt.plot(img_sum)
-    plt.scatter(max_index, img_sum_arr[max_index],linewidth=0.3, s=30, c='r')
-    plt.scatter(min_index, img_sum_arr[min_index],linewidth=0.3, s=30, c='b')
-    plt.axhline(y=ch, color='r', linestyle='-')
-    plt.axhline(y=cl, color='g', linestyle='-')
-    plt.axhline(y=ca, color='b', linestyle='-')
-    plt.show()
+    # plt.plot(img_sum)
+    # plt.scatter(max_index, img_sum_arr[max_index],linewidth=0.3, s=30, c='r')
+    # plt.scatter(min_index, img_sum_arr[min_index],linewidth=0.3, s=30, c='b')
+    # plt.axhline(y=ch, color='r', linestyle='-')
+    # plt.axhline(y=cl, color='g', linestyle='-')
+    # plt.axhline(y=ca, color='b', linestyle='-')
+    # plt.show()
 
     isa_line = []
     isa_line_location =[]
@@ -211,9 +211,9 @@ def choose_subimage(cropped, cropped_coordinate):
             satisfiedImgsCor.append(cropped_coordinate[i])
             print('appended')
 
-    for img in satisfiedImgs:
-        cv.imshow("Frame", img)
-        cv.waitKey(0)
+    # for img in satisfiedImgs:
+    #     cv.imshow("Frame", img)
+    #     cv.waitKey(0)
     print(satisfiedImgsCor)
     
     return satisfiedImgs, satisfiedImgsCor
@@ -259,12 +259,17 @@ def projection_cut(satisfiedImgs, satisfiedImgsCor):
     promo_v = list(promo_v.keys())
     promo_h = list(promo_h.keys())
 
+    margin = 10
     for i in range(len(promo_v)-1, -1, -1):
         for promo2 in promo_h:
             if promo_v[i][0] != promo_v[i][1] and promo2[0] != promo2[1]: 
-                characters.append(satisfiedImgs[promo2[0]:promo2[1], promo_v[i][0]:promo_v[i][1]])
-                characterCoordinates.append((promo_v[i][0], promo2[0], promo_v[i][1], promo2[1]))
-
+                characters.append(satisfiedImgs[(promo2[0]-margin):(promo2[1]+margin), (promo_v[i][0]-margin):(promo_v[i][1]+margin)])
+                characterCoordinates.append((promo_v[i][0]-margin, promo2[0]-margin, promo_v[i][1]+margin, promo2[1]+margin))
+    # for img in characters:
+    #     # print(characters[i])
+    #     if not img.size > 0:
+    #         characters.pop(characters.index(img))
+    characters = [x for x in characters if x.size >0]
     # tmpImg = []
     # for promo in promo_v:
     #     if promo[0] != promo[1]:
@@ -335,87 +340,94 @@ def character_coor_locating(hist, max_index, ch, ca, cl):
 
 if __name__ == "__main__":
     #unit test
-    filename = './nlp_prep_modules/lvt001.jpg'
+    filename = 'D:/NLP dataset/TaleOfKieu'
     # filename = './dv001.jpg'
-    img = cv.imread(filename)
+    for t in range(1, 164):
+        if t<10:
+            filename2 = filename + "/page00" + str(t)+ ".jpg"
+        elif t>=10 and t<100:
+            filename2 = filename + "/page0" + str(t)+ ".jpg"
+        else:
+            filename2 = filename + "/page" + str(t)+ ".jpg"
+        # filename2 = filename + "/page002.jpg"
+        img = cv.imread(filename2)
 
-    cv.imshow("Frame", img)
-    cv.waitKey(0)
-
-    scale_percent = 150 # 225 # percent of original size
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    # resize image
-    raw = cv.resize(img, dim, interpolation = cv.INTER_AREA)
-
-    cv.imshow("Frame", img)
-    cv.waitKey(0)
-    img = image_processing(raw)
-
-    regex = re.match(r'(.*)!?\/([^\/]*)\.\w*', filename,  re.M|re.I)
-
-    sub_filename = regex.group(2)
-
-    if not os.path.exists(sub_filename):
-        os.mkdir(sub_filename)
-
-
-    # cv.imshow("Frame", img)
-    # cv.waitKey(0)  
-
-    # _, image = findContour(img)    
-     
-    # cv.imshow("Frame", image)
-    # cv.waitKey(0)   
-
-    #horizontal: 1; vertical: 0
-    img_column_sum, min_column_idx, max_column_idx = projection_hist(img, 0, 10)
-    img_row_sum, min_row_idx, max_row_idx = projection_hist(img, 1, 10)
-
-    ch_v, ca_v, cl_v = c_calculator(img_column_sum, min_column_idx, max_column_idx)
-    ch_h, ca_h, cl_h = c_calculator(img_row_sum, min_row_idx, max_row_idx)
-    vertical_line = line_detection(img, 0)
-    horizontal_line = line_detection(img, 1)
-
-    vertical_line.insert(0,0)
-    vertical_line.append(int(img.shape[1]))
-    horizontal_line.insert(0,0)
-    horizontal_line.append(int(img.shape[0]))
-
-    print(vertical_line, horizontal_line)
-    
-    cropped = []
-    cropped_coordinate =[]
-    for i in range(len(vertical_line)-1):
-        for j in range(len(horizontal_line)-1):
-            cropped.append(raw[horizontal_line[j]:horizontal_line[j+1], vertical_line[i]:vertical_line[i+1]])
-            cropped_coordinate.append((horizontal_line[j], vertical_line[i], horizontal_line[j+1], vertical_line[i+1]))
-
-    print(cropped_coordinate)
-    
-    satisfiedImgs, satisfiedImgsCor = choose_subimage(cropped, cropped_coordinate)
-
-    subsub_filename = []
-    for i in range(len(satisfiedImgs)):
-        subsub_filename.append(sub_filename + '/' + str(i))
-        if not os.path.exists(subsub_filename[i]):
-            os.mkdir(subsub_filename[i])
-        # cv.imshow("Frame", satisfiedImgs[i])
+        # cv.imshow("Frame", img)
         # cv.waitKey(0)
-        cv.imwrite(sub_filename + '/' + str(i)+'.jpg', satisfiedImgs[i])
 
-    # for image in satisfiedImgs:
-    #     cv.imshow("Frame", image)
-    #     cv.waitKey(0)
-    # print(satisfiedImgsCor)
+        scale_percent = 150 # 225 # percent of original size
+        width = int(img.shape[1] * scale_percent / 100)
+        height = int(img.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        # resize image
+        raw = cv.resize(img, dim, interpolation = cv.INTER_AREA)
 
-    for i in range(len(satisfiedImgs)):
-        characters, characterCoordinates = projection_cut(satisfiedImgs[i], satisfiedImgsCor[i])
-        
-        for j in range(len(characters)):
-            # cv.imshow("Frame", characters[j])
-            # cv.waitKey(0)
-            cv.imwrite(subsub_filename[i] + '/' + str(j) + '.jpg', characters[j])
+        # cv.imshow("Frame", img)
+        # cv.waitKey(0)
+        img = image_processing(raw)
+
+        regex = re.match(r'(.*)!?\/([^\/]*)\.\w*', filename2,  re.M|re.I)
+
+        sub_filename = "./" + regex.group(2)
+
+        if not os.path.exists(sub_filename):
+            os.mkdir(sub_filename)
+
+        # cv.imshow("Frame", img)
+        # cv.waitKey(0)  
+
+        # _, image = findContour(img)    
+
+        # cv.imshow("Frame", image)
+        # cv.waitKey(0)   
+
+        #horizontal: 1; vertical: 0
+        img_column_sum, min_column_idx, max_column_idx = projection_hist(img, 0, 10)
+        img_row_sum, min_row_idx, max_row_idx = projection_hist(img, 1, 10)
+
+        ch_v, ca_v, cl_v = c_calculator(img_column_sum, min_column_idx, max_column_idx)
+        ch_h, ca_h, cl_h = c_calculator(img_row_sum, min_row_idx, max_row_idx)
+        vertical_line = line_detection(img, 0)
+        horizontal_line = line_detection(img, 1)
+
+        vertical_line.insert(0,0)
+        vertical_line.append(int(img.shape[1]))
+        horizontal_line.insert(0,0)
+        horizontal_line.append(int(img.shape[0]))
+
+        print(vertical_line, horizontal_line)
+
+        cropped = []
+        cropped_coordinate =[]
+        for i in range(len(vertical_line)-1):
+            for j in range(len(horizontal_line)-1):
+                cropped.append(raw[(horizontal_line[j]):(horizontal_line[j+1]), (vertical_line[i]):(vertical_line[i+1])])
+                cropped_coordinate.append((horizontal_line[j], vertical_line[i], horizontal_line[j+1], vertical_line[i+1]))
+
+        print(cropped_coordinate)
+
+        satisfiedImgs, satisfiedImgsCor = choose_subimage(cropped, cropped_coordinate)
+
+        subsub_filename = []
+        for i in range(len(satisfiedImgs)):
+            subsub_filename.append(sub_filename + '/' + str(i))
+            if not os.path.exists(subsub_filename[i]):
+                os.mkdir(subsub_filename[i])
+            # # cv.imshow("Frame", satisfiedImgs[i])
+            # # cv.waitKey(0)
+            # cv.imwrite(sub_filename + '/' + str(i)+'.jpg', satisfiedImgs[i])
+
+        # for image in satisfiedImgs:
+        #     cv.imshow("Frame", image)
+        #     cv.waitKey(0)
+        # print(satisfiedImgsCor)
+
+        for i in range(len(satisfiedImgs)):
+            characters, characterCoordinates = projection_cut(satisfiedImgs[i], satisfiedImgsCor[i])
+
+            for j in range(len(characters)):
+                # cv.imshow("Frame", characters[j])
+                # cv.waitKey(0)
+                cv.imwrite(subsub_filename[i] + '/' + str(j) + '.jpg', characters[j])
 
 
